@@ -25,12 +25,10 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         return product;
     }
 
-    public int count() {
-        return jdbcTemplate.queryForObject("SELECT count(*) FROM product", Integer.class);
-    }
-
     @Override
     public Page<Product> findAllByContaining(String keyword, Pageable page) {
+
+        int count = jdbcTemplate.queryForObject("SELECT count(* ) FROM product WHERE CONCAT(id, ' ', name, ' ' , brand, ' ' , madein, ' ' , price) LIKE CONCAT('%',?,'%') ", Integer.class, keyword);
 
         Sort.Order order = !page.getSort().isEmpty() ? page.getSort().toList().get(0) : Sort.Order.by("ID");
 
@@ -39,7 +37,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
                 (rs, rowNum) -> mapUserResult(rs), keyword
         );
 
-        return new PageImpl<Product>(products, page, count());
+        return new PageImpl<Product>(products, page, count);
     }
 
 }
